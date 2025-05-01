@@ -29,14 +29,28 @@ export const createProblem = async (req, res) => {
                 expected_output: output,
             }))
 
+            console.log(submissions);
+            
+            console.log("submissionResult");
             const submissionResults = await submitBatch(submissions)
 
+            console.log(submissionResults);
+            
             const tokens = submissionResults.map((res) => res.token);
 
+            console.log(tokens);
+            
             const results = await pollBatchResults(tokens)
 
-            for (let i = 0; i < results.legth; i++) {
-
+            console.log(results);
+            console.log("outside of loop");
+            
+            for (let i = 0; i < results.length; i++) {
+                console.log(i);
+                console.log("enter");
+                
+                console.log(`result : ${results[i]}`);
+                
                 const result = results[i];
                 if (result.status.id !== 3) {
                     return res.status(400).json({
@@ -45,17 +59,25 @@ export const createProblem = async (req, res) => {
                 }
             }
 
-            const newProblem = await db.problem.creare({
+            const newProblem = await db.problem.create({
                 data: {
-                    title, description, difficuilty, tags, examples, constraints, testcases, codeSnippets, referenceSolutions, languageId, userId: req.user.id,
+                    title, description, difficuilty, tags, examples, constraints, testcases, codeSnippets, referenceSolutions, userId: req.user.id,
                 }
             })
+
+            console.log(newProblem);
+            
 
             return res.status(201).json(newProblem);
         }
 
     } catch (error) {
-
+        console.error(error);
+        return res.status(401).json(
+            {message : "Error creating problem"}
+        )
+        
+        
     }
     //loop through  each reference solution for different language
     //for each language , create a new problem in the database with the corresponding solution

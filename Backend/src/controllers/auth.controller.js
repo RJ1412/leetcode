@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 export const register = async(req , res) => {
     console.log("step 0");
-    const {email , password , name} = req.body
+    const {email , password , name } = req.body
     console.log("step 1");
     
     if(!email || !password || !name){
