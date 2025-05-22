@@ -6,7 +6,6 @@ import { useEffect, useState } from "react"
 const CodeBackground = ({ title, subtitle }) => {
   const [activeIndex, setActiveIndex] = useState(0)
 
-  // Code snippets to display in the background
   const codeSnippets = [
     `function twoSum(nums, target) {
   const map = new Map();
