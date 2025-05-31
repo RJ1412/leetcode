@@ -1,19 +1,22 @@
-import express from "express"
-import {authMiddleware} from "../middleware/auth.middleware.js"
-import { addProblemToPlaylist, createPlaylist, deletePlaylist, getAllListDetails, getPlayListDetails, removeProblemFromPlaylist } from "../controllers/playlist.controller.js"
+import express from "express";
+import { authMiddleware } from "../middleware/auth.middleware.js";
+import { addProblemToPlaylist, createPlayList, deletePlayList, getPlayAllListDetails, getPlayListDetails, removeProblemFromPlaylist } from "../controllers/playlist.controller.js";
 
-const  playlistRoutes = express.Router()
+const router = express.Router();
 
-playlistRoutes.get("/" , authMiddleware ,getAllListDetails )
+router.get("/" , authMiddleware , getPlayAllListDetails)
 
-playlistRoutes.get("/:playlistId" , authMiddleware , getPlayListDetails)
+router.get("/:playlistId" , authMiddleware , getPlayListDetails)
 
-playlistRoutes.post("/create-playlist" , authMiddleware , createPlaylist)
+router.post("/create-playlist" ,authMiddleware ,  createPlayList)
 
-playlistRoutes.post("/:playlistId/add-problem" , authMiddleware , addProblemToPlaylist )
 
-playlistRoutes.post("/:playlistId" , authMiddleware , deletePlaylist)
 
-playlistRoutes.delete("/:playlistId/remove-problem" , authMiddleware , removeProblemFromPlaylist )
+router.post('/:playlistId/add-problem' , authMiddleware , addProblemToPlaylist)
 
-export default playlistRoutes
+router.delete("/:playlistId" , authMiddleware , deletePlayList)
+
+router.delete("/:playlistId/remove-problem" , authMiddleware , removeProblemFromPlaylist)
+
+
+export default router;

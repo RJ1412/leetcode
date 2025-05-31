@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Link } from "react-router-dom";
-import { Bookmark, PencilIcon, Trash, TrashIcon, Plus } from "lucide-react";
+import { Bookmark, PencilIcon, TrashIcon, Plus } from "lucide-react";
 import { useActions } from "../store/useAction";
 import AddToPlaylistModal from "./AddToPlaylist";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistStore } from "../store/usePlaylistStore";
 
-
 const ProblemsTable = ({ problems }) => {
   const { authUser } = useAuthStore();
   const { onDeleteProblem } = useActions();
   const { createPlaylist } = usePlaylistStore();
+
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("ALL");
   const [selectedTag, setSelectedTag] = useState("ALL");
@@ -20,7 +20,6 @@ const ProblemsTable = ({ problems }) => {
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState(null);
 
-  // Extract all unique tags from problems
   const allTags = useMemo(() => {
     if (!Array.isArray(problems)) return [];
     const tagsSet = new Set();
@@ -28,10 +27,8 @@ const ProblemsTable = ({ problems }) => {
     return Array.from(tagsSet);
   }, [problems]);
 
-  // Define allowed difficulties
   const difficulties = ["EASY", "MEDIUM", "HARD"];
 
-  // Filter problems based on search, difficulty, and tags
   const filteredProblems = useMemo(() => {
     return (problems || [])
       .filter((problem) =>
@@ -45,7 +42,6 @@ const ProblemsTable = ({ problems }) => {
       );
   }, [problems, search, difficulty, selectedTag]);
 
-  // Pagination logic
   const itemsPerPage = 5;
   const totalPages = Math.ceil(filteredProblems.length / itemsPerPage);
   const paginatedProblems = useMemo(() => {
@@ -70,7 +66,6 @@ const ProblemsTable = ({ problems }) => {
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-10">
-      {/* Header with Create Playlist Button */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Problems</h2>
         <button
@@ -82,7 +77,6 @@ const ProblemsTable = ({ problems }) => {
         </button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
         <input
           type="text"
@@ -117,7 +111,6 @@ const ProblemsTable = ({ problems }) => {
         </select>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-xl shadow-md">
         <table className="table table-zebra table-lg bg-base-200 text-base-content">
           <thead className="bg-base-300">
@@ -132,7 +125,7 @@ const ProblemsTable = ({ problems }) => {
           <tbody>
             {paginatedProblems.length > 0 ? (
               paginatedProblems.map((problem) => {
-                const isSolved = problem.solvedBy.some(
+                const isSolved = (problem.solvedBy || []).some(
                   (user) => user.userId === authUser?.id
                 );
                 return (
@@ -213,7 +206,6 @@ const ProblemsTable = ({ problems }) => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-center mt-6 gap-2">
         <button
           className="btn btn-sm"
@@ -234,13 +226,12 @@ const ProblemsTable = ({ problems }) => {
         </button>
       </div>
 
-      {/* Modals */}
       <CreatePlaylistModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreatePlaylist}
       />
-      
+
       <AddToPlaylistModal
         isOpen={isAddToPlaylistModalOpen}
         onClose={() => setIsAddToPlaylistModalOpen(false)}

@@ -66,4 +66,13 @@ export const useAuthStore = create((set) => ({
       toast.error("Error logging out");
     }
   },
+  
+  fetchUser: async () => {
+    const res = await axios.get("/api/user");
+    set({ authUser: res.data });
+  },
+  updateUser: async (updatedFields) => {
+    const res = await axios.put("/api/user", updatedFields);
+    set({ authUser: res.data });
+  },
 }));

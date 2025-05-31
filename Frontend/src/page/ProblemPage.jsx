@@ -23,18 +23,27 @@ import { useExecutionStore } from "../store/useExecutionStore";
 import { useSubmissionStore } from "../store/useSubmissionStore";
 import Submission from "../components/Submission";
 import SubmissionsList from "../components/SubmissionList";
+import { axiosInstance } from "../lib/axios";
+
+
 
 const ProblemPage = () => {
   const { id } = useParams();
   const { getProblemById, problem, isProblemLoading } = useProblemStore();
 
   const {
-    submission: submissions,
+    submissions,
     isLoading: isSubmissionsLoading,
     getSubmissionForProblem,
     getSubmissionCountForProblem,
     submissionCount,
+    getSuccessRateForProblem,
+    successRate,
   } = useSubmissionStore();
+
+  getSuccessRateForProblem(id);
+
+  const { executeCode, submission, isExecuting } = useExecutionStore();
 
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
@@ -42,40 +51,47 @@ const ProblemPage = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [testcases, setTestCases] = useState([]);
 
-  const { executeCode, submission, isExecuting } = useExecutionStore();
+useEffect(() => {
+  getProblemById(id);
+}, [id]);
 
-  useEffect(() => {
-    getProblemById(id);
+useEffect(() => {
+  if (id) {
     getSubmissionCountForProblem(id);
-  }, [id]);
+    getSuccessRateForProblem(id);
+  }
+}, [id]);
 
-  useEffect(() => {
-    if (problem) {
-      setCode(
-        problem.codeSnippets?.[selectedLanguage] || submission?.sourceCode || ""
-      );
-      setTestCases(
-        problem.testcases?.map((tc) => ({
-          input: tc.input,
-          output: tc.output,
-        })) || []
-      );
-    }
-  }, [problem, selectedLanguage]);
+useEffect(() => {
+  if (problem && selectedLanguage) {
+    setCode(problem.codeSnippets?.[selectedLanguage] || "");
+    setTestCases(
+      problem.testcases?.map((tc) => ({
+        input: tc.input,
+        output: tc.output,
+      })) || []
+    );
+  }
+}, [problem, selectedLanguage]);
 
-  useEffect(() => {
-    if (activeTab === "submissions" && id) {
-      getSubmissionForProblem(id);
-    }
-  }, [activeTab, id]);
+useEffect(() => {
+  if (activeTab === "submissions" && id) {
+    getSubmissionForProblem(id);
+  }
+}, [activeTab, id]);
 
-  console.log("submission", submissions);
+
 
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
     setSelectedLanguage(lang);
-    setCode(problem.codeSnippets?.[lang] || "");
+    if (problem?.codeSnippets?.[lang]) {
+      setCode(problem.codeSnippets[lang]);
+    } else {
+      setCode("");
+    }
   };
+
 
   const handleRunCode = (e) => {
     e.preventDefault();
@@ -106,48 +122,44 @@ const ProblemPage = () => {
         return (
           <div className="prose max-w-none">
             <p className="text-lg mb-6">{problem.description}</p>
-
             {problem.examples && (
               <>
                 <h3 className="text-xl font-bold mb-4">Examples:</h3>
-                {Object.entries(problem.examples).map(
-                  ([lang, example], idx) => (
-                    <div
-                      key={lang}
-                      className="bg-base-200 p-6 rounded-xl mb-6 font-mono"
-                    >
-                      <div className="mb-4">
-                        <div className="text-indigo-300 mb-2 text-base font-semibold">
-                          Input:
-                        </div>
-                        <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
-                          {example.input}
-                        </span>
+                {Object.entries(problem.examples).map(([lang, example]) => (
+                  <div
+                    key={lang}
+                    className="bg-base-200 p-6 rounded-xl mb-6 font-mono"
+                  >
+                    <div className="mb-4">
+                      <div className="text-indigo-300 mb-2 text-base font-semibold">
+                        Input:
                       </div>
-                      <div className="mb-4">
-                        <div className="text-indigo-300 mb-2 text-base font-semibold">
-                          Output:
-                        </div>
-                        <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
-                          {example.output}
-                        </span>
-                      </div>
-                      {example.explanation && (
-                        <div>
-                          <div className="text-emerald-300 mb-2 text-base font-semibold">
-                            Explanation:
-                          </div>
-                          <p className="text-base-content/70 text-lg font-sem">
-                            {example.explanation}
-                          </p>
-                        </div>
-                      )}
+                      <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
+                        {example.input}
+                      </span>
                     </div>
-                  )
-                )}
+                    <div className="mb-4">
+                      <div className="text-indigo-300 mb-2 text-base font-semibold">
+                        Output:
+                      </div>
+                      <span className="bg-black/90 px-4 py-1 rounded-lg font-semibold text-white">
+                        {example.output}
+                      </span>
+                    </div>
+                    {example.explanation && (
+                      <div>
+                        <div className="text-emerald-300 mb-2 text-base font-semibold">
+                          Explanation:
+                        </div>
+                        <p className="text-base-content/70 text-lg font-sem">
+                          {example.explanation}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </>
             )}
-
             {problem.constraints && (
               <>
                 <h3 className="text-xl font-bold mb-4">Constraints:</h3>
@@ -167,12 +179,7 @@ const ProblemPage = () => {
             isLoading={isSubmissionsLoading}
           />
         );
-      case "discussion":
-        return (
-          <div className="p-4 text-center text-base-content/70">
-            No discussions yet
-          </div>
-        );
+
       case "hints":
         return (
           <div className="p-4">
@@ -219,15 +226,14 @@ const ProblemPage = () => {
               <span>{submissionCount} Submissions</span>
               <span className="text-base-content/30">•</span>
               <ThumbsUp className="w-4 h-4" />
-              <span>95% Success Rate</span>
+              <span>{successRate}% Success Rate</span>
             </div>
           </div>
         </div>
         <div className="flex-none gap-4">
           <button
-            className={`btn btn-ghost btn-circle ${
-              isBookmarked ? "text-primary" : ""
-            }`}
+            className={`btn btn-ghost btn-circle ${isBookmarked ? "text-primary" : ""
+              }`}
             onClick={() => setIsBookmarked(!isBookmarked)}
           >
             <Bookmark className="w-5 h-5" />
@@ -240,11 +246,15 @@ const ProblemPage = () => {
             value={selectedLanguage}
             onChange={handleLanguageChange}
           >
-            {Object.keys(problem.codeSnippets || {}).map((lang) => (
-              <option key={lang} value={lang}>
-                {lang.charAt(0).toUpperCase() + lang.slice(1)}
-              </option>
-            ))}
+            {problem?.codeSnippets &&
+              Object.keys(problem.codeSnippets).map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                </option>
+              ))}
+
+
+
           </select>
         </div>
       </nav>
@@ -255,36 +265,25 @@ const ProblemPage = () => {
             <div className="card-body p-0">
               <div className="tabs tabs-bordered">
                 <button
-                  className={`tab gap-2 ${
-                    activeTab === "description" ? "tab-active" : ""
-                  }`}
+                  className={`tab gap-2 ${activeTab === "description" ? "tab-active" : ""
+                    }`}
                   onClick={() => setActiveTab("description")}
                 >
                   <FileText className="w-4 h-4" />
                   Description
                 </button>
                 <button
-                  className={`tab gap-2 ${
-                    activeTab === "submissions" ? "tab-active" : ""
-                  }`}
+                  className={`tab gap-2 ${activeTab === "submissions" ? "tab-active" : ""
+                    }`}
                   onClick={() => setActiveTab("submissions")}
                 >
                   <Code2 className="w-4 h-4" />
                   Submissions
                 </button>
+
                 <button
-                  className={`tab gap-2 ${
-                    activeTab === "discussion" ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab("discussion")}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Discussion
-                </button>
-                <button
-                  className={`tab gap-2 ${
-                    activeTab === "hints" ? "tab-active" : ""
-                  }`}
+                  className={`tab gap-2 ${activeTab === "hints" ? "tab-active" : ""
+                    }`}
                   onClick={() => setActiveTab("hints")}
                 >
                   <Lightbulb className="w-4 h-4" />
@@ -327,9 +326,8 @@ const ProblemPage = () => {
               <div className="p-4 border-t border-base-300 bg-base-200">
                 <div className="flex justify-between items-center">
                   <button
-                    className={`btn btn-primary gap-2 ${
-                      isExecuting ? "loading" : ""
-                    }`}
+                    className={`btn btn-primary gap-2 ${isExecuting ? "loading" : ""
+                      }`}
                     onClick={handleRunCode}
                     disabled={isExecuting}
                   >

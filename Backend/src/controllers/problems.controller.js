@@ -29,19 +29,23 @@ export const createProblem = async (req, res) => {
                 expected_output: output,
             }))
 
+            console.log("Submissions: ");
+            
             console.log(submissions);
             
-            console.log("submissionResult");
+            console.log("submissionResult: ");
             const submissionResults = await submitBatch(submissions)
 
             console.log(submissionResults);
             
             const tokens = submissionResults.map((res) => res.token);
-
+            console.log("Tokens: ");
+            
             console.log(tokens);
             
             const results = await pollBatchResults(tokens)
-
+            console.log("Results: ");
+            
             console.log(results);
             console.log("outside of loop");
             
@@ -91,13 +95,18 @@ export const createProblem = async (req, res) => {
 
 export const getAllProblems = async (req, res) => {
     try {
-        const problems = await db.problem.findMany()
-
+        const problems = await db.Problem.findMany()
+        console.log(problems);
+        
         if(!problems){
+            console.log("No problems found");
+            
             return res.status(404).json({
                 error:"No problems Found"
             })
         }
+        
+        
         
         return res.status(201).json({
             success : true,
@@ -105,6 +114,8 @@ export const getAllProblems = async (req, res) => {
             problems
         });
     } catch (error) {
+        console.log(error);
+        
         console.error(error);
         return res.status(401).json(
             {message : "Error fetching problem"}
@@ -117,7 +128,7 @@ export const getProblemById = async (req, res) => {
     const {id} = req.params;
 
     try {
-        const problem =  await db.problem.finUnique(
+        const problem =  await db.Problem.findUnique(
             {
                 where : {
                     id
@@ -222,7 +233,7 @@ export const deleteProblem = async (req, res) => {
     try {
         const {id} = req.params;
 
-        const {problem} = await db.problem.finUnique(
+        const {problem} = await db.problem.findUnique(
             {
                 where : {id}
             }

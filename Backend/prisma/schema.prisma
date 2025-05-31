@@ -40,6 +40,8 @@ model User {
   problemSolved ProblemSolved[]
 
   playlists Playlist[]
+
+  Discussion Discussion[]
 }
 
 model Problem {
@@ -63,6 +65,8 @@ model Problem {
   solvedBy   ProblemSolved[]
 
   problemsPlaylists ProblemPlaylist[]
+
+  Discussion Discussion[]
 }
 
 model Submission {
@@ -152,4 +156,19 @@ model ProblemPlaylist{
   problem Problem @relation(fields: [problemId] , references: [id] , onDelete: Cascade)
 
   @@unique([playlistId , problemId])
+}
+
+model Discussion {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([userId])
 }

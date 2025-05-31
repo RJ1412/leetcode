@@ -21,7 +21,7 @@ import {useNavigate} from "react-router-dom";
 const problemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
+  difficuilty: z.enum(["EASY", "MEDIUM", "HARD"]),
   tags: z.array(z.string()).min(1, "At least one tag is required"),
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
@@ -69,7 +69,7 @@ const sampledpData = {
   category: "dp", // Dynamic Programming
   description:
     "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
-  difficulty: "EASY",
+  difficuilty: "EASY",
   tags: ["Dynamic Programming", "Math", "Memoization"],
   constraints: "1 <= n <= 45",
   hints:
@@ -315,7 +315,7 @@ const sampleStringProblem = {
   title: "Valid Palindrome",
   description:
     "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers. Given a string s, return true if it is a palindrome, or false otherwise.",
-  difficulty: "EASY",
+  difficuilty: "EASY",
   tags: ["String", "Two Pointers"],
   constraints:
     "1 <= s.length <= 2 * 10^5\ns consists only of printable ASCII characters.",
@@ -677,21 +677,21 @@ const CreateProblemForm = () => {
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-base md:text-lg font-semibold">
-                    Difficulty
+                    Difficuilty
                   </span>
                 </label>
                 <select
                   className="select select-bordered w-full text-base md:text-lg"
-                  {...register("difficulty")}
+                  {...register("difficuilty")}
                 >
                   <option value="EASY">Easy</option>
                   <option value="MEDIUM">Medium</option>
                   <option value="HARD">Hard</option>
                 </select>
-                {errors.difficulty && (
+                {errors.difficuilty && (
                   <label className="label">
                     <span className="label-text-alt text-error">
-                      {errors.difficulty.message}
+                      {errors.difficuilty.message}
                     </span>
                   </label>
                 )}
