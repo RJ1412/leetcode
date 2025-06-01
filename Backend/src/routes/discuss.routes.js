@@ -1,10 +1,10 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { addComment, getCommentsForProblem } from "../controllers/discussion.controller.js";
-const router = express.Router();
+const discuss = express.Router();
 
-router.post("/:problemId", authMiddleware, addComment);
+discuss.post("/:problemId", authMiddleware, addComment);
 
-router.get("/:problemId", getCommentsForProblem);
+discuss.get("/:problemId", getCommentsForProblem);
 
-export default router;
+export default discuss;

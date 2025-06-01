@@ -53,7 +53,12 @@ const ProblemPage = () => {
 useEffect(() => {
   getProblemById(id);
 }, [id]);
-
+useEffect(() => {
+  // Load all playlists when component mounts
+  if (playlists.length === 0) {
+    getAllPlaylists();
+  }
+}, []);
 useEffect(() => {
   if (id) {
     getSubmissionCountForProblem(id);
@@ -79,6 +84,7 @@ useEffect(() => {
   }
 }, [activeTab, id]);
 
+const { playlists, createPlaylist, getAllPlaylists } = usePlaylistStore();
 
 
   const handleLanguageChange = (e) => {

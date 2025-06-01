@@ -5,7 +5,7 @@ export const createPlayList = async (req, res) => {
     const { name, description } = req.body;
     const userId = req.user.id;
 
-    const playList = await db.playlist.create({
+    const playList = await db.Playlist.create({
       data: {
         name,
         description,
@@ -25,7 +25,7 @@ export const createPlayList = async (req, res) => {
 
 export const getPlayAllListDetails = async (req, res) => {
   try {
-    const playLists = await db.playlist.findMany({
+    const playLists = await db.Playlist.findMany({
       where: {
         userId: req.user.id,
       },
@@ -51,7 +51,7 @@ export const getPlayListDetails = async (req, res) => {
   const { playlistId } = req.params;
 
   try {
-    const playList = await db.playlist.findUnique({
+    const playList = await db.Playlist.findUnique({
       where: { id: playlistId, userId: req.user.id },
       include: {
         problems: {
@@ -93,9 +93,9 @@ export const addProblemToPlaylist = async (req, res) => {
       }))
     );
 
-    const problemsInPlaylist = await db.problemInPlaylist.createMany({
+    const problemsInPlaylist = await db.ProblemPlaylist.createMany({
       data: problemIds.map((problemId) => ({
-        playListId: playlistId, 
+        playlistId, 
         problemId,
       })),
     });
@@ -142,7 +142,7 @@ export const removeProblemFromPlaylist = async (req, res) => {
     }
  
 
-    const deletedProblem = await db.problemInPlaylist.deleteMany({
+    const deletedProblem = await db.ProblemPlaylist.deleteMany({
       where: {
         playlistId,
         problemId: {

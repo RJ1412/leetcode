@@ -3,10 +3,12 @@ import { useProblemStore } from "../store/useProblemStore";
 import { Loader, PlusCircle } from "lucide-react";
 import ProblemTable from "../components/ProblemTable";
 import { Link } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+
 
 const HomePage = () => {
   const { getAllProblems, problems, isProblemsLoading } = useProblemStore();
-
+  const { authUser } = useAuthStore();
   useEffect(() => {
     getAllProblems();
   }, [getAllProblems]);
@@ -32,14 +34,15 @@ const HomePage = () => {
       </p>
 
       {/* Add Problem Button */}
-      <Link
-        to="/add-problem"
-        className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold shadow-md hover:bg-primary/90 transition z-10"
-      >
-        <PlusCircle className="w-5 h-5" />
-        Add Problem
-      </Link>
-
+      {authUser?.role === "ADMIN" && (
+        <Link
+          to="/add-problem"
+          className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold shadow-md hover:bg-primary/90 transition z-10"
+        >
+          <PlusCircle className="w-5 h-5" />
+          Add Problem
+        </Link>
+      )}
       {problems.length > 0 ? (
         <ProblemTable problems={problems} />
       ) : (
