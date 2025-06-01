@@ -41,7 +41,6 @@ const ProblemPage = () => {
     successRate,
   } = useSubmissionStore();
 
-  getSuccessRateForProblem(id);
 
   const { executeCode, submission, isExecuting } = useExecutionStore();
 

@@ -51,3 +51,19 @@
     }
   }
   
+  /* Custom heatmap colors */
+.color-empty {
+  fill: #ebedf0;
+}
+.color-scale-1 {
+  fill: #c6f6d5; /* light green */
+}
+.color-scale-2 {
+  fill: #9ae6b4;
+}
+.color-scale-3 {
+  fill: #68d391;
+}
+.color-scale-4 {
+  fill: #38a169; /* dark green */
+}

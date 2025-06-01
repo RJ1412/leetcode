@@ -11,6 +11,7 @@ export const useProfileStore = create((set) => ({
     try {
       set({ loading: true });
       const res = await axiosInstance.get("/users/my-profile");
+
       const { user, solvedProblems } = res.data;
       set({ profile: user, solvedProblems });
     } catch (error) {
@@ -22,7 +23,7 @@ export const useProfileStore = create((set) => ({
 
   updateProfile: async (profileData) => {
     try {
-      const res = await axiosInstance.put("/users/my-profile", profileData, {
+      const res = await axiosInstance.put("/users/update-profile", profileData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Profile updated");
