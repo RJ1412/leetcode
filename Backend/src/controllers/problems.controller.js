@@ -29,9 +29,11 @@ export const createProblem = async (req, res) => {
                 expected_output: output,
             }))
 
+
+
             console.log("Submissions: ");
             
-            console.log(submissions);
+            console.log(solutionCode);
             
             console.log("submissionResult: ");
             const submissionResults = await submitBatch(submissions)
@@ -165,7 +167,7 @@ export const updateProblem = async (req, res) => {
     }
 
     try {
-        const problem = await db.problem.findUnique({ where: { id } });
+        const problem = await db.Problem.findUnique({ where: { id } });
 
         if (!problem) {
             return res.status(404).json({ error: "Problem not found" });
@@ -185,10 +187,22 @@ export const updateProblem = async (req, res) => {
                 expected_output: output,
             }));
 
+            console.log("Submission : ", submissions);
+            console.log("Source Code: " , submissions.solutionCode);
+            // console.log("new code" , source_code);
+            
+            
+            
+
             const submissionResults = await submitBatch(submissions);
             const tokens = submissionResults.map(res => res.token);
             const results = await pollBatchResults(tokens);
 
+            // console.log(`Submission Result  of language ${languageId}: ` ,submissionResults);
+            console.log(results);
+            
+            
+            
             for (let i = 0; i < results.length; i++) {
                 const result = results[i];
                 if (result.status.id !== 3) {
@@ -199,7 +213,7 @@ export const updateProblem = async (req, res) => {
             }
         }
 
-        const updatedProblem = await db.problem.update({
+        const updatedProblem = await db.Problem.update({
             where: { id },
             data: {
                 title,
@@ -222,8 +236,8 @@ export const updateProblem = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: "Error updating problem" });
+        console.error("UpdateProblem error:", error);
+        return res.status(500).json({ message:  error.message });
     }
 }
 
@@ -233,7 +247,7 @@ export const deleteProblem = async (req, res) => {
     try {
         const {id} = req.params;
 
-        const {problem} = await db.problem.findUnique(
+        const problem = await db.Problem.findUnique(
             {
                 where : {id}
             }
@@ -244,9 +258,9 @@ export const deleteProblem = async (req, res) => {
             )
         }
 
-        await db.problem.delete({where : {id}})
+        await db.Problem.delete({where : {id}})
 
-        req.status(200).json({
+        res.status(200).json({
             success: true,
             message:"Problem deleted Successfully",
         })
@@ -261,7 +275,7 @@ export const deleteProblem = async (req, res) => {
 
 export const getAllProblemsSolvedByUser = async (req, res) => {
     try {
-        const problems = await db.problem.findMany({
+        const problems = await db.Problem.findMany({
             where :{
                 solvedBy:{
                     some:{
@@ -282,7 +296,8 @@ export const getAllProblemsSolvedByUser = async (req, res) => {
         
         res.status(200).json({
             success:true,
-            message:"Problems fetched successfully"
+            message:"Problems fetched successfully",
+            problems
         })
     } catch (error) {
          console.error(error);

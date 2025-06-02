@@ -8,7 +8,7 @@ problemRoutes.post("/create-problem" , authMiddleware , checkAdmin ,createProble
 problemRoutes.post("/get-all-problem" , authMiddleware , getAllProblems)
 problemRoutes.post("/get-problem/:id"  , getProblemById)
 problemRoutes.post("/update-problem/:id" , authMiddleware , checkAdmin , updateProblem)
-problemRoutes.post("/delete-problem/:id" , authMiddleware , checkAdmin , deleteProblem)
-problemRoutes.post("/get-solved-problem" , authMiddleware , getAllProblemsSolvedByUser)
+problemRoutes.delete("/delete-problem/:id" , authMiddleware , checkAdmin , deleteProblem)
+problemRoutes.get("/get-solved-problem" , authMiddleware , getAllProblemsSolvedByUser)
 
 export default problemRoutes;

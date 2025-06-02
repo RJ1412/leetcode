@@ -30,13 +30,31 @@ export const useProblemStore = create((set) => ({
       const res = await axiosInstance.post(`/problems/get-problem/${id}`);
 
       set({ problem: res.data.problem });
-    
+
       toast.success(res.data.message);
     } catch (error) {
       console.log("Error getting all problems", error);
       toast.error("Error in getting problems");
     } finally {
       set({ isProblemLoading: false });
+    }
+  },
+
+  updateProblem: async (id, updatedData) => {
+    try {
+      const res = await axiosInstance.post(`/problems/update-problem/${id}`, updatedData); // assuming RESTful PATCH
+      toast.success(res.data.message);
+
+      set((state) => ({
+        problems: state.problems.map((p) => (p.id === id ? res.data.problem : p)),
+        problem: res.data.problem,
+      }));
+
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating problem", error);
+      toast.error(error.response?.data?.error || "Error updating problem");
+      return { success: false };
     }
   },
 
@@ -51,5 +69,5 @@ export const useProblemStore = create((set) => ({
     }
   }
 
-  
+
 }));

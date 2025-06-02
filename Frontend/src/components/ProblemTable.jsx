@@ -6,11 +6,18 @@ import { useActions } from "../store/useAction";
 import AddToPlaylistModal from "./AddToPlaylist";
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePlaylistStore } from "../store/usePlaylistStore";
+import { useProblemStore } from "../store/useProblemStore";
+import EditProblemModal from "./EditProblemModal";
+
+
 
 const ProblemsTable = ({ problems }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingProblem, setEditingProblem] = useState(null);
   const { authUser } = useAuthStore();
   const { onDeleteProblem } = useActions();
   const { playlists, createPlaylist, getAllPlaylists } = usePlaylistStore();
+  const { getSolvedProblemByUser, solvedProblems } = useProblemStore();
 
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("ALL");
@@ -20,12 +27,29 @@ const ProblemsTable = ({ problems }) => {
   const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
   const [selectedProblemId, setSelectedProblemId] = useState(null);
   const [activePlaylist, setActivePlaylist] = useState(null);
+  const [isLoadingSolved, setIsLoadingSolved] = useState(true);
 
   useEffect(() => {
     if (playlists.length === 0) {
       getAllPlaylists();
     }
   }, [getAllPlaylists, playlists.length]);
+
+  useEffect(() => {
+    const fetchSolved = async () => {
+      if (authUser) {
+        setIsLoadingSolved(true);
+        await getSolvedProblemByUser();
+        setIsLoadingSolved(false);
+      }
+    };
+    fetchSolved();
+  }, [authUser, getSolvedProblemByUser]);
+
+  const solvedProblemIds = useMemo(() => {
+    if (!Array.isArray(solvedProblems)) return new Set();
+    return new Set(solvedProblems.map((p) => p.id));
+  }, [solvedProblems]);
 
   const allTags = useMemo(() => {
     const tagsSet = new Set();
@@ -34,7 +58,11 @@ const ProblemsTable = ({ problems }) => {
   }, [problems]);
 
   const difficulties = ["EASY", "MEDIUM", "HARD"];
-  const baseProblems = activePlaylist?.problems || problems;
+  const baseProblems = useMemo(() => {
+    return Array.isArray(activePlaylist?.problems)
+      ? activePlaylist.problems.map((p) => p.problem)
+      : problems;
+  }, [activePlaylist, problems]);
 
   const filteredProblems = useMemo(() => {
     return (baseProblems || [])
@@ -63,16 +91,12 @@ const ProblemsTable = ({ problems }) => {
       <div className="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">Problems</h2>
         <div className="flex items-center gap-2">
-          {/* Playlist dropdown */}
           <div className="dropdown dropdown-hover">
             <label tabIndex={0} className="btn btn-outline gap-2">
               <ChevronDown className="w-4 h-4" />
               Playlists
             </label>
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52"
-            >
+            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-200 rounded-box w-52">
               {playlists.length === 0 && <li className="text-sm px-2">No playlists</li>}
               {playlists.map((playlist) => (
                 <li key={playlist.id}>
@@ -89,8 +113,6 @@ const ProblemsTable = ({ problems }) => {
               ))}
             </ul>
           </div>
-
-          {/* Create Playlist Button */}
           <button className="btn btn-primary gap-2" onClick={() => setIsCreateModalOpen(true)}>
             <Plus className="w-4 h-4" />
             Create Playlist
@@ -105,7 +127,7 @@ const ProblemsTable = ({ problems }) => {
             <div>
               <span className="font-semibold">Viewing Playlist:</span> {activePlaylist.name} <br />
               <span className="text-xs text-gray-500">
-                Created by: {activePlaylist.createdBy?.name || "Unknown"}
+                Created by: {activePlaylist.user?.name || "Unknown"}
               </span>
             </div>
             <button className="btn btn-sm btn-outline" onClick={() => setActivePlaylist(null)}>
@@ -165,13 +187,21 @@ const ProblemsTable = ({ problems }) => {
           <tbody>
             {paginatedProblems.length > 0 ? (
               paginatedProblems.map((problem) => {
-                const isSolved = problem.solvedBy?.some(
-                  (user) => user.userId === authUser?.id
-                );
+                const isSolved = solvedProblemIds.has(problem.id);
                 return (
                   <tr key={problem.id}>
                     <td>
-                      <input type="checkbox" checked={isSolved} readOnly className="checkbox checkbox-sm" />
+                      {isLoadingSolved ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : (
+                        <input
+                          type="checkbox"
+                          checked={isSolved}
+                          readOnly
+                          className={`checkbox checkbox-lg border-2 ${isSolved ? 'border-green-600 bg-green-200' : 'border-gray-300'}`}
+                        />
+
+                      )}
                     </td>
                     <td>
                       <Link to={`/problem/${problem.id}`} className="font-semibold hover:underline">
@@ -181,7 +211,10 @@ const ProblemsTable = ({ problems }) => {
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {problem.tags?.map((tag, idx) => (
-                          <span key={idx} className="badge badge-outline badge-warning text-xs font-bold">
+                          <span
+                            key={idx}
+                            className="badge badge-outline badge-warning text-xs font-bold"
+                          >
                             {tag}
                           </span>
                         ))}
@@ -189,15 +222,14 @@ const ProblemsTable = ({ problems }) => {
                     </td>
                     <td>
                       <span
-                        className={`badge font-semibold text-xs text-white ${
-                          problem.difficulty === "EASY"
-                            ? "badge-success"
-                            : problem.difficulty === "MEDIUM"
+                        className={`badge font-semibold text-xs text-white ${problem.difficuilty === "EASY"
+                          ? "badge-success"
+                          : problem.difficuilty === "MEDIUM"
                             ? "badge-warning"
                             : "badge-error"
-                        }`}
+                          }`}
                       >
-                        {problem.difficulty}
+                        {problem.difficuilty}
                       </span>
                     </td>
                     <td>
@@ -210,9 +242,16 @@ const ProblemsTable = ({ problems }) => {
                             >
                               <TrashIcon className="w-4 h-4 text-white" />
                             </button>
-                            <button disabled className="btn btn-sm btn-warning">
+                            <button
+                              onClick={() => {
+                                setEditingProblem(problem);
+                                setIsEditModalOpen(true);
+                              }}
+                              className="btn btn-sm btn-warning"
+                            >
                               <PencilIcon className="w-4 h-4 text-white" />
                             </button>
+
                           </div>
                         )}
                         <button
@@ -270,6 +309,12 @@ const ProblemsTable = ({ problems }) => {
         onClose={() => setIsAddToPlaylistModalOpen(false)}
         problemId={selectedProblemId}
       />
+      <EditProblemModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        problem={editingProblem}
+      />
+
     </div>
   );
 };

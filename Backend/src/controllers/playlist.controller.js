@@ -30,6 +30,7 @@ export const getPlayAllListDetails = async (req, res) => {
         userId: req.user.id,
       },
       include: {
+        user: true, // 👈 Include creator
         problems: {
           include: {
             problem: true,
@@ -47,13 +48,15 @@ export const getPlayAllListDetails = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch playlist" });
   }
 };
+
 export const getPlayListDetails = async (req, res) => {
   const { playlistId } = req.params;
 
   try {
     const playList = await db.Playlist.findUnique({
-      where: { id: playlistId, userId: req.user.id },
+      where: { id: playlistId },
       include: {
+        user: true, // 👈 Include creator
         problems: {
           include: {
             problem: true,
