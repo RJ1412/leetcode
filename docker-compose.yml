@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres-container
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypass@postgres:5432/mydb
+      - JUDGE0_API_URL=http://host.docker.internal:2358
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  prisma-studio:
+    image: node:18
+    container_name: prisma-studio
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5555:5555"
+    command: sh -c "npm install && npx prisma studio"
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypass@postgres:5432/mydb
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:
