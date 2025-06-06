@@ -5,9 +5,9 @@ import {
   MemoryStick as Memory,
   Calendar,
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 const SubmissionsList = ({ submissions, isLoading }) => {
-  // Helper function to safely parse JSON strings
   const safeParse = (data) => {
     try {
       return JSON.parse(data);
@@ -17,7 +17,6 @@ const SubmissionsList = ({ submissions, isLoading }) => {
     }
   };
 
-  // Helper function to calculate average memory usage
   const calculateAverageMemory = (memoryData) => {
     const memoryArray = safeParse(memoryData).map((m) =>
       parseFloat(m.split(" ")[0])
@@ -28,7 +27,6 @@ const SubmissionsList = ({ submissions, isLoading }) => {
     );
   };
 
-  // Helper function to calculate average runtime
   const calculateAverageTime = (timeData) => {
     const timeArray = safeParse(timeData).map((t) =>
       parseFloat(t.split(" ")[0])
@@ -37,7 +35,6 @@ const SubmissionsList = ({ submissions, isLoading }) => {
     return timeArray.reduce((acc, curr) => acc + curr, 0) / timeArray.length;
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -46,46 +43,49 @@ const SubmissionsList = ({ submissions, isLoading }) => {
     );
   }
 
-  // No submissions state
   if (!submissions?.length) {
     return (
-      <div className="text-center p-8">
-        <div className="text-base-content/70">No submissions yet</div>
+      <div className="text-center p-8 text-zinc-400 dark:text-zinc-500">
+        No submissions yet
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {submissions.map((submission) => {
+    <div className="space-y-5">
+      {submissions.map((submission, idx) => {
         const avgMemory = calculateAverageMemory(submission.memory);
         const avgTime = calculateAverageTime(submission.time);
 
         return (
-          <div
+          <motion.div
             key={submission.id}
-            className="card bg-base-200 shadow-lg hover:shadow-xl transition-shadow rounded-lg"
-          >
-            <div className="card-body p-4">
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05, duration: 0.4, ease: "easeOut" }}
+            className="bg-[#111827]/70 backdrop-blur border border-zinc-700 hover:border-zinc-500 shadow-lg hover:shadow-2xl transition-all duration-300 rounded-2xl">
+            <div className="p-5">
               <div className="flex items-center justify-between">
-                {/* Left Section: Status and Language */}
+                {/* Left Section */}
                 <div className="flex items-center gap-4">
                   {submission.status === "Accepted" ? (
-                    <div className="flex items-center gap-2 text-success">
-                      <CheckCircle2 className="w-6 h-6" />
-                      <span className="font-semibold">Accepted</span>
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="font-medium">Accepted</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 text-error">
-                      <XCircle className="w-6 h-6" />
-                      <span className="font-semibold">{submission.status}</span>
+                    <div className="flex items-center gap-2 text-red-400">
+                      <XCircle className="w-5 h-5" />
+                      <span className="font-medium">{submission.status}</span>
                     </div>
                   )}
-                  <div className="badge badge-neutral">{submission.language}</div>
+                  <span className="px-2 py-1 rounded bg-zinc-800 text-xs text-zinc-300 border border-zinc-700">
+                    {submission.language}
+                  </span>
                 </div>
 
-                {/* Right Section: Runtime, Memory, and Date */}
-                <div className="flex items-center gap-4 text-base-content/70">
+                {/* Right Section */}
+                <div className="flex items-center gap-5 text-sm text-zinc-400">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
                     <span>{avgTime.toFixed(3)} s</span>
@@ -103,7 +103,7 @@ const SubmissionsList = ({ submissions, isLoading }) => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
