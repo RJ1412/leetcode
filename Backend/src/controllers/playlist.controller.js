@@ -26,9 +26,7 @@ export const createPlayList = async (req, res) => {
 export const getPlayAllListDetails = async (req, res) => {
   try {
     const playLists = await db.Playlist.findMany({
-      where: {
-        userId: req.user.id,
-      },
+      
       include: {
         user: true, // 👈 Include creator
         problems: {
