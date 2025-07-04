@@ -1,11 +1,18 @@
-FROM node:18-alpine
+# Backend Dockerfile
+FROM node:20
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+
+# Install dependencies (including nodemon)
+RUN npm install && npm install -g nodemon
 
 COPY . .
 
-EXPOSE 5000
-CMD ["node", "src/index.js"]
+RUN npx prisma generate
+
+EXPOSE 8080
+
+# Run with nodemon
+CMD ["nodemon", "src/index.js"]

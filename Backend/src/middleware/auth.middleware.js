@@ -34,8 +34,8 @@ export const authMiddleware = async (req , res , next) => {
             }
         })
 
-        console.log(user);
-        console.log(user.role);
+        // console.log(user);
+        // console.log(user.role);
         
         
 

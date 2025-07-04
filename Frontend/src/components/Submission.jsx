@@ -94,35 +94,48 @@ const SubmissionResults = ({ submission }) => {
                 </tr>
               </thead>
               <tbody>
-                {submission.testCases.map((testCase) => (
-                  <motion.tr
-                    key={testCase.id}
-                    className="hover:bg-white/5 transition-colors"
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.05 * testCase.id }}
-                  >
-                    <td>
-                      <div
-                        className={`flex items-center gap-2 ${
-                          testCase.passed ? 'text-green-400' : 'text-red-400'
-                        }`}
-                      >
-                        {testCase.passed ? (
-                          <CheckCircle2 className="w-5 h-5" />
-                        ) : (
-                          <XCircle className="w-5 h-5" />
-                        )}
-                        {testCase.passed ? 'Passed' : 'Failed'}
-                      </div>
-                    </td>
-                    <td className="font-mono text-white">{testCase.expected}</td>
-                    <td className="font-mono text-white">{testCase.stdout || 'null'}</td>
-                    <td className="text-zinc-300">{testCase.memory}</td>
-                    <td className="text-zinc-300">{testCase.time}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
+  {submission.testCases.map((testCase) => {
+    const isFailed = !testCase.passed;
+    const blurStyle = {
+      filter: isFailed ? 'none' : 'blur(8px)',
+      userSelect: isFailed ? 'auto' : 'none', // optional: prevent selecting blurred text
+    };
+
+    return (
+      <motion.tr
+        key={testCase.id}
+        className="hover:bg-white/5 transition-colors"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3, delay: 0.05 * testCase.id }}
+      >
+        <td>
+          <div
+            className={`flex items-center gap-2 ${
+              testCase.passed ? 'text-green-400' : 'text-red-400'
+            }`}
+          >
+            {testCase.passed ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : (
+              <XCircle className="w-5 h-5" />
+            )}
+            {testCase.passed ? 'Passed' : 'Failed'}
+          </div>
+        </td>
+        <td className="font-mono text-white" style={blurStyle}>
+          {testCase.expected}
+        </td>
+        <td className="font-mono text-white" style={blurStyle}>
+          {testCase.stdout || 'null'}
+        </td>
+        <td className="text-zinc-300">{testCase.memory}</td>
+        <td className="text-zinc-300">{testCase.time}</td>
+      </motion.tr>
+    );
+  })}
+</tbody>
+
             </table>
           </div>
         </div>
